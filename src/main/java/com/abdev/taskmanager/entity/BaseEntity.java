@@ -3,12 +3,14 @@ package com.abdev.taskmanager.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Getter
 @Setter
+@Where(clause = "deleted = false")
 public abstract class BaseEntity {
 
     @Id
