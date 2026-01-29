@@ -22,6 +22,7 @@ public abstract class BaseEntity {
 
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
     private Boolean deleted = false;
 
     @PrePersist
