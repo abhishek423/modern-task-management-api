@@ -11,7 +11,7 @@ public interface TaskService {
 
     Task getTaskById(Long id);
 
-    Page<Task> getTaskByStatus(TaskStatus status, Pageable pageable);
+    Page<Task> getTasksByStatus(TaskStatus status, Pageable pageable);
 
-    Page<Task> getTaskByUser(Long userId, Pageable pageable);
+    Page<Task> getTasksByUser(Long userId, Pageable pageable);
 }

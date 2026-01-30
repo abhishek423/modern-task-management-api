@@ -52,12 +52,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Page<Task> getTaskByStatus(TaskStatus status, Pageable pageable) {
+    public Page<Task> getTasksByStatus(TaskStatus status, Pageable pageable) {
         return taskRepository.findByStatus(status, pageable);
     }
 
     @Override
-    public Page<Task> getTaskByUser(Long userId, Pageable pageable) {
+    public Page<Task> getTasksByUser(Long userId, Pageable pageable) {
         return taskRepository.findByAssignedTo_Id(userId, pageable);
     }
 }
