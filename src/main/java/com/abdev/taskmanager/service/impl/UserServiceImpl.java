@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
                     "User already exists with email: " + user.getEmail()
             );
         }
-        return null;
+        return userRepository.save(user);
     }
 
     @Override
