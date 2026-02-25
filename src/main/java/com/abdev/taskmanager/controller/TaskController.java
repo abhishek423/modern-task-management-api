@@ -1,6 +1,7 @@
 package com.abdev.taskmanager.controller;
 
 import com.abdev.taskmanager.dto.request.CreateTaskRequest;
+import com.abdev.taskmanager.dto.response.ApiResponse;
 import com.abdev.taskmanager.dto.response.PagedResponse;
 import com.abdev.taskmanager.dto.response.TaskResponse;
 import com.abdev.taskmanager.entity.Task;
@@ -28,7 +29,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(
+    public ResponseEntity<ApiResponse<TaskResponse>> createTask(
             @Valid @RequestBody CreateTaskRequest request
             ) {
 
@@ -52,11 +53,16 @@ public class TaskController {
         response.setDueDate(saved.getDueDate());
         response.setAssignedUserId(saved.getAssignedTo().getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.<TaskResponse>builder()
+                        .success(true)
+                        .message("Task created successfully")
+                        .data(response)
+                        .build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskResponse> getTask(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<TaskResponse>> getTask(@PathVariable Long id) {
 
         Task task = taskService.getTaskById(id);
 
@@ -68,11 +74,16 @@ public class TaskController {
         response.setDueDate(task.getDueDate());
         response.setAssignedUserId(task.getAssignedTo().getId());
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.<TaskResponse>builder()
+                        .success(true)
+                        .message("Task fetched successfully")
+                        .data(response)
+                        .build());
     }
 
     @GetMapping
-    public ResponseEntity<PagedResponse<TaskResponse>> getTasksByStatus(
+    public ResponseEntity<ApiResponse<PagedResponse<TaskResponse>>> getTasksByStatus(
             @RequestParam TaskStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -81,7 +92,7 @@ public class TaskController {
         Pageable pageable = PageRequest.of(page,size);
         Page<Task> taskPage = taskService.getTasksByStatus(status, pageable);
 
-        List<TaskResponse> responses = taskPage.getContent()
+        List<TaskResponse> taskResponses = taskPage.getContent()
                 .stream().map(task -> {
                     TaskResponse res = new TaskResponse();
                     res.setId(task.getId());
@@ -95,18 +106,25 @@ public class TaskController {
                 .toList();
 
         PagedResponse<TaskResponse> pagedResponse = new PagedResponse<>(
-                responses,
+                taskResponses,
                 taskPage.getNumber(),
                 taskPage.getSize(),
                 taskPage.getTotalElements(),
                 taskPage.getTotalPages()
         );
 
-        return ResponseEntity.ok(pagedResponse);
+        ApiResponse<PagedResponse<TaskResponse>> response =
+                ApiResponse.<PagedResponse<TaskResponse>>builder()
+                        .success(true)
+                        .message("Tasks fetched successfully")
+                        .data(pagedResponse)
+                        .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<PagedResponse<TaskResponse>> getTasksByUserResponse(
+    public ResponseEntity<ApiResponse<PagedResponse<TaskResponse>>> getTasksByUserResponse(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -114,7 +132,7 @@ public class TaskController {
         Pageable pageable = PageRequest.of(page,size);
         Page<Task> taskPage = taskService.getTasksByUser(userId, pageable);
 
-        List<TaskResponse> responses = taskPage.getContent()
+        List<TaskResponse> taskResponses = taskPage.getContent()
                 .stream().map(task -> {
                     TaskResponse res = new TaskResponse();
                     res.setId(task.getId());
@@ -128,12 +146,20 @@ public class TaskController {
                 .toList();
 
         PagedResponse<TaskResponse> pagedResponse = new PagedResponse<>(
-                responses,
+                taskResponses,
                 taskPage.getNumber(),
                 taskPage.getSize(),
                 taskPage.getTotalElements(),
                 taskPage.getTotalPages()
                 );
-        return ResponseEntity.ok(pagedResponse);
+
+        ApiResponse<PagedResponse<TaskResponse>> response =
+                ApiResponse.<PagedResponse<TaskResponse>>builder()
+                        .success(true)
+                        .message("Tasks fetched successfully")
+                        .data(pagedResponse)
+                        .build();
+
+        return ResponseEntity.ok(response);
     }
 }

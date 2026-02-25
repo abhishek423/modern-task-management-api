@@ -1,6 +1,7 @@
 package com.abdev.taskmanager.controller;
 
 import com.abdev.taskmanager.dto.request.CreateUserRequest;
+import com.abdev.taskmanager.dto.response.ApiResponse;
 import com.abdev.taskmanager.dto.response.UserResponse;
 import com.abdev.taskmanager.entity.User;
 import com.abdev.taskmanager.service.UserService;
@@ -19,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
            @Valid @RequestBody CreateUserRequest request
     ) {
         User user = new User();
@@ -33,11 +34,16 @@ public class UserController {
         response.setName(saved.getName());
         response.setEmail(saved.getEmail());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.<UserResponse>builder()
+                        .success(true)
+                        .message("User created successfully")
+                        .data(response)
+                        .build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(
+    public ResponseEntity<ApiResponse<UserResponse>> getUser(
             @PathVariable Long id
     ) {
         User user = userService.getUserById(id);
@@ -47,8 +53,12 @@ public class UserController {
         response.setName(user.getName());
         response.setEmail(user.getEmail());
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.<UserResponse>builder()
+                        .success(true)
+                        .message("User fetched successfully")
+                        .data(response)
+                        .build());
     }
 
 }
