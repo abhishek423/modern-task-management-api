@@ -1,5 +1,6 @@
 package com.abdev.taskmanager.controller;
 
+import com.abdev.taskmanager.common.ApiMessages;
 import com.abdev.taskmanager.dto.request.CreateTaskRequest;
 import com.abdev.taskmanager.dto.response.ApiResponse;
 import com.abdev.taskmanager.dto.response.PagedResponse;
@@ -56,7 +57,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<TaskResponse>builder()
                         .success(true)
-                        .message("Task created successfully")
+                        .message(ApiMessages.TASK_CREATED)
                         .data(response)
                         .build());
     }
@@ -77,7 +78,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.<TaskResponse>builder()
                         .success(true)
-                        .message("Task fetched successfully")
+                        .message(ApiMessages.TASK_FETCHED)
                         .data(response)
                         .build());
     }
@@ -116,7 +117,7 @@ public class TaskController {
         ApiResponse<PagedResponse<TaskResponse>> response =
                 ApiResponse.<PagedResponse<TaskResponse>>builder()
                         .success(true)
-                        .message("Tasks fetched successfully")
+                        .message(ApiMessages.TASKS_FETCHED)
                         .data(pagedResponse)
                         .build();
 
@@ -156,7 +157,7 @@ public class TaskController {
         ApiResponse<PagedResponse<TaskResponse>> response =
                 ApiResponse.<PagedResponse<TaskResponse>>builder()
                         .success(true)
-                        .message("Tasks fetched successfully")
+                        .message(ApiMessages.TASKS_FETCHED)
                         .data(pagedResponse)
                         .build();
 

@@ -1,5 +1,6 @@
 package com.abdev.taskmanager.controller;
 
+import com.abdev.taskmanager.common.ApiMessages;
 import com.abdev.taskmanager.dto.request.CreateUserRequest;
 import com.abdev.taskmanager.dto.response.ApiResponse;
 import com.abdev.taskmanager.dto.response.UserResponse;
@@ -37,7 +38,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<UserResponse>builder()
                         .success(true)
-                        .message("User created successfully")
+                        .message(ApiMessages.USER_CREATED)
                         .data(response)
                         .build());
     }
@@ -56,7 +57,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.<UserResponse>builder()
                         .success(true)
-                        .message("User fetched successfully")
+                        .message(ApiMessages.USER_FETCHED)
                         .data(response)
                         .build());
     }
