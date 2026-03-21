@@ -1,11 +1,10 @@
 package com.abdev.taskmanager;
 
-import com.jayway.jsonpath.JsonPath;
+import com.abdev.taskmanager.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,29 +17,11 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest{
     @Autowired
     private MockMvc mockMvc;
 
-    private Long createTestUser() throws Exception {
-
-        String request = """
-        {
-            "name": "Test User",
-            "email": "testuser@test.com"
-        }
-        """;
-
-        MvcResult result = mockMvc.perform(post("/api/v1/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
-                .andReturn();
-
-        String response = result.getResponse().getContentAsString();
-        Integer id = JsonPath.read(response, "$.data.id");
-        return id.longValue();
-    }
 
     @Test
     void shouldCreateTaskSuccessfully() throws Exception {
 
-        Long userId = createTestUser();
+        Long userId = TestDataFactory.createTestUser(mockMvc);
 
         String request = """
                 {
@@ -84,28 +65,8 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest{
     @Test
     void shouldCreateTaskSuccessfullyAndFetchById() throws Exception {
 
-        Long userId = createTestUser();
-
-        String request = """
-                {
-                    "title": "Test Task",
-                    "description": "Test Descr",
-                    "status": "TODO",
-                    "dueDate": "2026-06-15T06:04:02.798Z",
-                    "assignedUserId": %d
-                }
-                """.formatted(userId);
-
-        MvcResult result = mockMvc.perform(post("/api/v1/tasks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.title").value("Test Task"))
-                .andReturn();
-
-        String response = result.getResponse().getContentAsString();
-        Integer taskId = JsonPath.read(response, "$.data.id");
+        Long userId = TestDataFactory.createTestUser(mockMvc);
+        Long taskId = TestDataFactory.createTestTask(mockMvc,userId);
 
         mockMvc.perform(get("/api/v1/tasks/" + taskId))
                 .andExpect(status().isOk())
@@ -116,25 +77,8 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest{
     @Test
     void shouldCreateTaskSuccessfullyAndFetchByStatus() throws Exception {
 
-        Long userId = createTestUser();
-
-        String request = """
-                {
-                    "title": "Test Task",
-                    "description": "Test Descr",
-                    "status": "TODO",
-                    "dueDate": "2026-06-15T06:04:02.798Z",
-                    "assignedUserId": %d
-                }
-                """.formatted(userId);
-
-        MvcResult result = mockMvc.perform(post("/api/v1/tasks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.title").value("Test Task"))
-                .andReturn();
+        Long userId = TestDataFactory.createTestUser(mockMvc);
+        TestDataFactory.createMultipleTasks(mockMvc,userId,5);
 
         mockMvc.perform(get("/api/v1/tasks")
                         .param("status","TODO")
@@ -146,10 +90,56 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest{
     }
 
     @Test
+    void shouldReturnPaginatedTasks() throws Exception {
+
+        Long userId = TestDataFactory.createTestUser(mockMvc);
+        TestDataFactory.createMultipleTasks(mockMvc,userId,5);
+
+        mockMvc.perform(get("/api/v1/tasks")
+                        .param("status","TODO")
+                        .param("page", "0")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.data.length()").value(2));
+    }
+
+    @Test
+    void shouldReturnEmptyTasks() throws Exception {
+
+        Long userId = TestDataFactory.createTestUser(mockMvc);
+
+        mockMvc.perform(get("/api/v1/tasks")
+                        .param("status","TODO")
+                        .param("page", "0")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.data.length()").value(0));
+    }
+
+    @Test
     void shouldReturn404WhenTaskNotFound() throws Exception {
 
         mockMvc.perform(get("/api/v1/tasks/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Not Found"));
+    }
+
+    @Test
+    void shouldFailWhenTaskTitleMissing() throws Exception {
+
+        Long userId = TestDataFactory.createTestUser(mockMvc);
+
+        String request = """
+            {
+                "description": "desc",
+                "status": "TODO",
+                "assignedUserId": %d
+            }
+            """.formatted(userId);
+
+        mockMvc.perform(post("/api/v1/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest());
     }
 }
