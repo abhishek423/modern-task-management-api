@@ -1,4 +1,4 @@
-package com.abdev.taskmanager;
+package com.abdev.taskmanager.integration;
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @Transactional
-class UserControllerIntegrationTest extends BaseIntegrationTest{
+class UserControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
