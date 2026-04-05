@@ -3,7 +3,10 @@ package com.abdev.taskmanager.service.impl;
 import com.abdev.taskmanager.entity.Task;
 import com.abdev.taskmanager.entity.User;
 import com.abdev.taskmanager.entity.enums.TaskStatus;
+import com.abdev.taskmanager.event.TaskEvent;
+import com.abdev.taskmanager.event.TaskEventType;
 import com.abdev.taskmanager.exception.ResourceNotFoundException;
+import com.abdev.taskmanager.kafka.TaskEventProducer;
 import com.abdev.taskmanager.repository.TaskRepository;
 import com.abdev.taskmanager.repository.UserRepository;
 import com.abdev.taskmanager.service.TaskService;
@@ -22,11 +25,14 @@ public class TaskServiceImpl implements TaskService {
             LoggerFactory.getLogger(TaskServiceImpl.class);
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final TaskEventProducer taskEventProducer;
 
     public TaskServiceImpl(TaskRepository taskRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           TaskEventProducer taskEventProducer) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.taskEventProducer = taskEventProducer;
     }
 
     @Override
@@ -55,6 +61,17 @@ public class TaskServiceImpl implements TaskService {
 
         Task savedTask = taskRepository.save(task);
         log.info("Task created successfully with id: {}", savedTask.getId());
+
+        TaskEvent event = TaskEvent.create(
+                savedTask.getId(),
+                TaskEventType.TASK_CREATED
+        );
+
+        taskEventProducer.sendTaskEvent(event);
+        log.info("Kafka event sent: taskId={}, eventType={}, eventTimestamp={}",
+                savedTask.getId(),
+                event.getEventType(),
+                event.getTimestamp());
 
         return savedTask;
     }
