@@ -4,6 +4,7 @@ import com.abdev.taskmanager.entity.Task;
 import com.abdev.taskmanager.entity.User;
 import com.abdev.taskmanager.entity.enums.TaskStatus;
 import com.abdev.taskmanager.exception.ResourceNotFoundException;
+import com.abdev.taskmanager.kafka.TaskEventProducer;
 import com.abdev.taskmanager.repository.TaskRepository;
 import com.abdev.taskmanager.repository.UserRepository;
 import com.abdev.taskmanager.service.impl.TaskServiceImpl;
@@ -25,6 +26,9 @@ class TaskServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private TaskEventProducer taskEventProducer;
 
     @InjectMocks
     private TaskServiceImpl taskService;
@@ -49,6 +53,7 @@ class TaskServiceTest {
         assertNotNull(saved);
         assertEquals("Task Title",saved.getTitle());
         verify(taskRepository, times(1)).save(task);
+        verify(taskEventProducer).sendTaskEvent(any());
     }
 
     @Test
