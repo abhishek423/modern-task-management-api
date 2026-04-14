@@ -8,13 +8,20 @@ import java.util.UUID;
 public class TaskEvent {
     private String eventId = UUID.randomUUID().toString();
     private TaskEventType eventType;
-    private Long taskId;
+    private String eventVersion;
     private LocalDateTime timestamp = LocalDateTime.now();
+    private Object data;
 
     public static TaskEvent create(Long taskId, TaskEventType type) {
         TaskEvent event = new TaskEvent();
-        event.setTaskId(taskId);
+
+        TaskCreatedEventData taskCreatedEventData = new TaskCreatedEventData();
+        taskCreatedEventData.setTaskId(taskId);
+
         event.setEventType(type);
+        event.setEventVersion("v1");
+        event.setData(taskCreatedEventData);
+
         return event;
     }
 }
