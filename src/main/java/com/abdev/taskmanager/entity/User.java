@@ -2,9 +2,7 @@ package com.abdev.taskmanager.entity;
 
 import com.abdev.taskmanager.auth.entity.Role;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +14,9 @@ import java.util.Set;
         })
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User extends BaseEntity {
 
     @Column(nullable = false)
