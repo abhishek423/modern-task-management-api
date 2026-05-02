@@ -1,6 +1,7 @@
 package com.abdev.taskmanager.auth.service.impl;
 
 
+import com.abdev.taskmanager.auth.dto.request.LoginRequest;
 import com.abdev.taskmanager.auth.dto.request.RegisterRequest;
 import com.abdev.taskmanager.auth.entity.Role;
 import com.abdev.taskmanager.auth.entity.enums.RoleType;
@@ -9,6 +10,8 @@ import com.abdev.taskmanager.auth.service.AuthService;
 import com.abdev.taskmanager.entity.User;
 import com.abdev.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public void register(RegisterRequest request) {
@@ -40,5 +44,15 @@ public class AuthServiceImpl implements AuthService {
         user.getRoles().add(userRole);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public void login(LoginRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
     }
 }

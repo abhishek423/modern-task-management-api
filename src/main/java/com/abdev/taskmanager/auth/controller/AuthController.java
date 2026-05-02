@@ -1,5 +1,6 @@
 package com.abdev.taskmanager.auth.controller;
 
+import com.abdev.taskmanager.auth.dto.request.LoginRequest;
 import com.abdev.taskmanager.auth.dto.request.RegisterRequest;
 import com.abdev.taskmanager.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -17,5 +18,11 @@ public class AuthController {
     public String register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
         return "User registered successfully";
+    }
+
+    @PostMapping("/login")
+    public String login(@Valid @RequestBody LoginRequest request) {
+        authService.login(request);
+        return "Login successful";
     }
 }
