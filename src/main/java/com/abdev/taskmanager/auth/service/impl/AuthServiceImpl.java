@@ -3,15 +3,19 @@ package com.abdev.taskmanager.auth.service.impl;
 
 import com.abdev.taskmanager.auth.dto.request.LoginRequest;
 import com.abdev.taskmanager.auth.dto.request.RegisterRequest;
+import com.abdev.taskmanager.auth.dto.response.AuthResponse;
 import com.abdev.taskmanager.auth.entity.Role;
 import com.abdev.taskmanager.auth.entity.enums.RoleType;
 import com.abdev.taskmanager.auth.repository.RoleRepository;
 import com.abdev.taskmanager.auth.service.AuthService;
 import com.abdev.taskmanager.entity.User;
 import com.abdev.taskmanager.repository.UserRepository;
+import com.abdev.taskmanager.security.jwt.JwtService;
+import com.abdev.taskmanager.security.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Override
     public void register(RegisterRequest request) {
@@ -47,12 +52,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void login(LoginRequest request) {
-        authenticationManager.authenticate(
+    public AuthResponse login(LoginRequest request) {
+
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
+
+        UserPrincipal userPrincipal =
+                (UserPrincipal) authentication.getPrincipal();
+
+        String token = jwtService.generateToken(userPrincipal);
+
+        return new AuthResponse(token);
     }
 }

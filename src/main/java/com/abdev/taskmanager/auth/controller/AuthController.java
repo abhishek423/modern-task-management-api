@@ -2,6 +2,7 @@ package com.abdev.taskmanager.auth.controller;
 
 import com.abdev.taskmanager.auth.dto.request.LoginRequest;
 import com.abdev.taskmanager.auth.dto.request.RegisterRequest;
+import com.abdev.taskmanager.auth.dto.response.AuthResponse;
 import com.abdev.taskmanager.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@Valid @RequestBody LoginRequest request) {
-        authService.login(request);
-        return "Login successful";
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
