@@ -4,10 +4,12 @@ package com.abdev.taskmanager.auth.service.impl;
 import com.abdev.taskmanager.auth.dto.request.LoginRequest;
 import com.abdev.taskmanager.auth.dto.request.RegisterRequest;
 import com.abdev.taskmanager.auth.dto.response.AuthResponse;
+import com.abdev.taskmanager.auth.entity.RefreshToken;
 import com.abdev.taskmanager.auth.entity.Role;
 import com.abdev.taskmanager.auth.entity.enums.RoleType;
 import com.abdev.taskmanager.auth.repository.RoleRepository;
 import com.abdev.taskmanager.auth.service.AuthService;
+import com.abdev.taskmanager.auth.service.RefreshTokenService;
 import com.abdev.taskmanager.entity.User;
 import com.abdev.taskmanager.repository.UserRepository;
 import com.abdev.taskmanager.security.jwt.JwtService;
@@ -28,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void register(RegisterRequest request) {
@@ -64,8 +67,17 @@ public class AuthServiceImpl implements AuthService {
         UserPrincipal userPrincipal =
                 (UserPrincipal) authentication.getPrincipal();
 
-        String token = jwtService.generateToken(userPrincipal);
+        String accessToken = jwtService.generateToken(userPrincipal);
 
-        return new AuthResponse(token);
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow();
+
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(
+                accessToken,
+                refreshToken.getToken()
+        );
     }
 }
