@@ -46,4 +46,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public Optional<RefreshToken> findByToken(String token) {
         return repository.findByToken(token);
     }
+
+    @Override
+    public void deleteByUser(User user) {
+        repository.deleteByUser(user);
+    }
+
+    @Override
+    public void deleteByToken(String token) {
+        repository.findByToken(token)
+                .ifPresent(repository::delete);
+    }
 }

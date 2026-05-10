@@ -1,6 +1,7 @@
 package com.abdev.taskmanager.auth.controller;
 
 import com.abdev.taskmanager.auth.dto.request.LoginRequest;
+import com.abdev.taskmanager.auth.dto.request.LogoutRequest;
 import com.abdev.taskmanager.auth.dto.request.RefreshRequest;
 import com.abdev.taskmanager.auth.dto.request.RegisterRequest;
 import com.abdev.taskmanager.auth.dto.response.AuthResponse;
@@ -37,16 +38,39 @@ public class AuthController {
     @PostMapping("/refresh")
     public AuthResponse refresh(@RequestBody RefreshRequest request) {
 
-        RefreshToken token = refreshTokenService.findByToken(request.getRefreshToken())
+        RefreshToken oldToken = refreshTokenService.findByToken(
+                        request.getRefreshToken()
+                )
                 .map(refreshTokenService::verifyExpiration)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid refresh token"));
 
-        User user = token.getUser();
+        User user = oldToken.getUser();
+
+        // ROTATION
+        refreshTokenService.deleteByToken(oldToken.getToken());
+
+        RefreshToken newRefreshToken =
+                refreshTokenService.createRefreshToken(user);
 
         UserPrincipal userPrincipal = new UserPrincipal(user);
 
-        String accessToken = jwtService.generateToken(userPrincipal);
+        String newAccessToken =
+                jwtService.generateToken(userPrincipal);
 
-        return new AuthResponse(accessToken, request.getRefreshToken());
+        return new AuthResponse(
+                newAccessToken,
+                newRefreshToken.getToken()
+        );
+    }
+
+    @PostMapping("/logout")
+    public String logout(@RequestBody LogoutRequest request) {
+
+        refreshTokenService.deleteByToken(
+                request.getRefreshToken()
+        );
+
+        return "Logged out successfully";
     }
 }
